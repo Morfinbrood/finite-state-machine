@@ -36,7 +36,6 @@ class FSM {
         this.activeTransitions=stateObjs.transitions;
     }
 
-
     /**
      * Changes state according to event transition rules.
      * @param event
@@ -62,7 +61,28 @@ class FSM {
      * @param event
      * @returns {Array}
      */
-     getStates(event) {}
+     getStates(event) {
+        var arrayStates = [];
+        if (event==null){
+            for (var key in this.states) {
+                arrayStates.push(key);
+            };
+            return arrayStates;
+        }
+        else{
+            for (var key in this.states) {
+
+                var stateObjs=this.states[key];
+                stateObjs.transitions
+                for (var key2 in stateObjs.transitions) {
+                    if (key2===event){
+                        arrayStates.push(key);
+                    };
+                };
+            };
+            return arrayStates;
+        }
+    }
 
     /**
      * Goes back to previous state.
