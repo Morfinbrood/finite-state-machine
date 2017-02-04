@@ -7,8 +7,11 @@ class FSM {
         if (config==null){
             throw new Error ("no starting config");
         }
+        this.initalConfig=config.initial;
         this.states=config.states;
         this.activeState=config.initial;
+        var stateObjs=this.states[this.activeState];
+        this.activeTransitions=stateObjs.transitions;
     }
 
     /**
@@ -37,10 +40,11 @@ class FSM {
             throw new Error ("this state not founded in FSM scheme");
         };
 
-       // this.this.activeStateKey=
+        this.activeState=keyAttr;
+        var stateObjs=this.states[this.activeState];
+        this.activeTransitions=stateObjs.transitions;
 
-       this.activeState=keyAttr;
-   }
+    }
 
 
     /**
@@ -48,32 +52,35 @@ class FSM {
      * @param event
      */
      trigger(event) {
-        console.log("AvtiveState is ",this.activeState )
+        //console.log("start trigger(event) AvtiveState transitions is ", this.activeTransitions);
 
         var x=this.activeState ;
-
-
-     //   console.log("AvtiveState transitions is ",this.currentTransitions);
-     var keyAttr="notFounded";
-     for (var key in this.states.activeState.key) {
-        console.log("key= ", key);
-        if (key===event){
-            keyAttr=key;
+        //   console.log("AvtiveState transitions is ",this.currentTransitions);
+        var keyAttr="notFounded";
+        for (var key in this.activeTransitions) {
+            if (key===event){
+                keyAttr=key;
+            };
         };
-    };
 
-    if (keyAttr==="notFounded") {
-        throw new Error ("this event trigger not founded in FSM scheme");
-    };
+        if (keyAttr==="notFounded") {
+            throw new Error ("this event trigger not founded in FSM scheme");
+        };
 
-    this.changeState(keyAttr);
+        //console.log("this.activeTransitions[key]= ", this.activeTransitions[keyAttr]);
 
-}
+        this.changeState(this.activeTransitions[keyAttr]);
+
+        //console.log("after changeState AvtiveState transitions is ", this.activeTransitions);
+
+    }
 
     /**
      * Resets FSM state to initial.
      */
-     reset() {}
+     reset() {
+        this.changeState(this.initalConfig);
+     }
 
     /**
      * Returns an array of states for which there are specified event transition rules.
