@@ -26,24 +26,14 @@ class FSM {
      * Goes to specified state.
      * @param state
      */
-
      changeState(state) {
-        var keyAttr="notFounded";
-        //находим заданные ключи словаря и если они есть вносим в переменную, чтобы дальше с ним работать.
-        for (var key in this.states) {
-            if (key===state){
-                keyAttr=key;
-            };
-        };
-
+        var keyAttr=this.findedKey(state,this.states);
         if (keyAttr==="notFounded") {
             throw new Error ("this state not founded in FSM scheme");
         };
-
         this.activeState=keyAttr;
         var stateObjs=this.states[this.activeState];
         this.activeTransitions=stateObjs.transitions;
-
     }
 
 
@@ -52,27 +42,11 @@ class FSM {
      * @param event
      */
      trigger(event) {
-        //console.log("start trigger(event) AvtiveState transitions is ", this.activeTransitions);
-
-        var x=this.activeState ;
-        //   console.log("AvtiveState transitions is ",this.currentTransitions);
-        var keyAttr="notFounded";
-        for (var key in this.activeTransitions) {
-            if (key===event){
-                keyAttr=key;
-            };
-        };
-
+        var keyAttr=this.findedKey(event,this.activeTransitions);
         if (keyAttr==="notFounded") {
             throw new Error ("this event trigger not founded in FSM scheme");
         };
-
-        //console.log("this.activeTransitions[key]= ", this.activeTransitions[keyAttr]);
-
         this.changeState(this.activeTransitions[keyAttr]);
-
-        //console.log("after changeState AvtiveState transitions is ", this.activeTransitions);
-
     }
 
     /**
@@ -80,7 +54,7 @@ class FSM {
      */
      reset() {
         this.changeState(this.initalConfig);
-     }
+    }
 
     /**
      * Returns an array of states for which there are specified event transition rules.
@@ -108,8 +82,19 @@ class FSM {
      * Clears transition history
      */
      clearHistory() {}
- }
 
- module.exports = FSM;
+     findedKey(inputkey,inputObj){
+        var keyAttr="notFounded";
+        //находим заданные ключи словаря и если они есть вносим в переменную, чтобы дальше с ним работать.
+        for (var key in inputObj) {
+            if (key===inputkey){
+                keyAttr=key;
+            };
+        };
+        return keyAttr;
+    }
+}
 
- /** @Created by Uladzimir Halushka **/
+module.exports = FSM;
+
+/** @Created by Uladzimir Halushka **/
