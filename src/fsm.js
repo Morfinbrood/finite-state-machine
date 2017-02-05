@@ -12,6 +12,10 @@ class FSM {
         this.activeState=config.initial;
         var stateObjs=this.states[this.activeState];
         this.activeTransitions=stateObjs.transitions;
+        this.prevState=null;
+        this.history=[null,this.activeState];
+        this.dontWriteHistoryFlag=false;
+        this.undoDeep=0;
     }
 
     /**
@@ -32,6 +36,12 @@ class FSM {
             throw new Error ("this state not founded in FSM scheme");
         };
         this.activeState=keyAttr;
+        if (this.dontWriteHistoryFlag==true){
+            this.dontWriteHistoryFlag=false;    
+        } else{
+            this.disableRedoUndoAfterChangedState();
+            this.history.push(this.activeState);
+        };
         var stateObjs=this.states[this.activeState];
         this.activeTransitions=stateObjs.transitions;
     }
@@ -89,21 +99,45 @@ class FSM {
      * Returns false if undo is not available.
      * @returns {Boolean}
      */
-     undo() {}
+     undo() {
+        var historyLength=this.history.length;
+        if (this.history[historyLength-this.undoDeep-2]==null){
+            return false;
+        }
+        else{
+            this.undoDeep++;
+            this.dontWriteHistoryFlag=true;
+            this.changeState(this.history[historyLength-this.undoDeep-1]);
+            return true;
+        }
+    } 
 
     /**
      * Goes redo to state.
      * Returns false if redo is not available.
      * @returns {Boolean}
      */
-     redo() {}
+     redo() {
+        var historyLength=this.history.length;
+        if (this.undoDeep>0){
+            this.undoDeep--;
+            this.dontWriteHistoryFlag=true;
+            this.changeState(this.history[historyLength-this.undoDeep-1]);
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
 
     /**
      * Clears transition history
      */
-     clearHistory() {}
+     clearHistory() {
+        this.history=[null,this.activeState];
+    }
 
-     findedKey(inputkey,inputObj){
+    findedKey(inputkey,inputObj){
         var keyAttr="notFounded";
         //находим заданные ключи словаря и если они есть вносим в переменную, чтобы дальше с ним работать.
         for (var key in inputObj) {
@@ -113,6 +147,16 @@ class FSM {
         };
         return keyAttr;
     }
+
+    disableRedoUndoAfterChangedState(){
+        var historyNew=[];
+        var historyLength=this.history.length;
+        for (var i = 0; i <= historyLength-this.undoDeep-1; i++) {
+            historyNew.push(this.history[i]);
+        };
+        this.undoDeep=0;
+        this.history=historyNew;
+    };
 }
 
 module.exports = FSM;
