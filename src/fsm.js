@@ -3,26 +3,25 @@ class FSM {
      * Creates new FSM instance.
      * @param config
      */
-     constructor(config) {
-        if (config==null){
-            throw new Error ("no starting config");
-        }
-        this.initalConfig=config.initial;
-        this.states=config.states;
-        this.activeState=config.initial;
-        var stateObjs=this.states[this.activeState];
-        this.activeTransitions=stateObjs.transitions;
-        this.prevState=null;
-        this.history=[null,this.activeState];
-        this.dontWriteHistoryFlag=false;
-        this.undoDeep=0;
+    constructor(config) {
+        if (config == null)
+            throw new Error("no starting config");
+        this.initalConfig = config.initial;
+        this.states = config.states;
+        this.activeState = config.initial;
+        const stateObjs = this.states[this.activeState];
+        this.activeTransitions = stateObjs.transitions;
+        this.prevState = null;
+        this.history = [null, this.activeState];
+        this.dontWriteHistoryFlag = false;
+        this.undoDeep = 0;
     }
 
     /**
      * Returns active state.
      * @returns {String}
      */
-     getState() {
+    getState() {
         return this.activeState;
     }
 
@@ -30,38 +29,36 @@ class FSM {
      * Goes to specified state.
      * @param state
      */
-     changeState(state) {
-        var keyAttr=this.findedKey(state,this.states);
-        if (keyAttr==="notFounded") {
-            throw new Error ("this state not founded in FSM scheme");
-        };
-        this.activeState=keyAttr;
-        if (this.dontWriteHistoryFlag==true){
-            this.dontWriteHistoryFlag=false;    
-        } else{
+    changeState(state) {
+        const keyAttr = this.findedKey(state, this.states);
+        if (keyAttr === "notFounded")
+            throw new Error("this state not founded in FSM scheme");
+        this.activeState = keyAttr;
+        if (this.dontWriteHistoryFlag == true)
+            this.dontWriteHistoryFlag = false;
+        else {
             this.disableRedoUndoAfterChangedState();
             this.history.push(this.activeState);
         };
-        var stateObjs=this.states[this.activeState];
-        this.activeTransitions=stateObjs.transitions;
+        const stateObjs = this.states[this.activeState];
+        this.activeTransitions = stateObjs.transitions;
     }
 
     /**
      * Changes state according to event transition rules.
      * @param event
      */
-     trigger(event) {
-        var keyAttr=this.findedKey(event,this.activeTransitions);
-        if (keyAttr==="notFounded") {
-            throw new Error ("this event trigger not founded in FSM scheme");
-        };
+    trigger(event) {
+        const keyAttr = this.findedKey(event, this.activeTransitions);
+        if (keyAttr === "notFounded")
+            throw new Error("this event trigger not founded in FSM scheme");
         this.changeState(this.activeTransitions[keyAttr]);
     }
 
     /**
      * Resets FSM state to initial.
      */
-     reset() {
+    reset() {
         this.changeState(this.initalConfig);
     }
 
@@ -71,24 +68,20 @@ class FSM {
      * @param event
      * @returns {Array}
      */
-     getStates(event) {
-        var arrayStates = [];
-        if (event==null){
-            for (var key in this.states) {
+    getStates(event) {
+        let arrayStates = [];
+        if (event == null) {
+            for (let key in this.states)
                 arrayStates.push(key);
-            };
             return arrayStates;
         }
-        else{
-            for (var key in this.states) {
-
-                var stateObjs=this.states[key];
+        else {
+            for (let key in this.states) {
+                let stateObjs = this.states[key];
                 stateObjs.transitions
-                for (var key2 in stateObjs.transitions) {
-                    if (key2===event){
+                for (let key2 in stateObjs.transitions)
+                    if (key2 === event)
                         arrayStates.push(key);
-                    };
-                };
             };
             return arrayStates;
         }
@@ -99,63 +92,58 @@ class FSM {
      * Returns false if undo is not available.
      * @returns {Boolean}
      */
-     undo() {
-        var historyLength=this.history.length;
-        if (this.history[historyLength-this.undoDeep-2]==null){
+    undo() {
+        const historyLength = this.history.length;
+        if (this.history[historyLength - this.undoDeep - 2] == null)
             return false;
-        }
-        else{
+        else {
             this.undoDeep++;
-            this.dontWriteHistoryFlag=true;
-            this.changeState(this.history[historyLength-this.undoDeep-1]);
+            this.dontWriteHistoryFlag = true;
+            this.changeState(this.history[historyLength - this.undoDeep - 1]);
             return true;
         }
-    } 
+    }
 
     /**
      * Goes redo to state.
      * Returns false if redo is not available.
      * @returns {Boolean}
      */
-     redo() {
-        var historyLength=this.history.length;
-        if (this.undoDeep>0){
+    redo() {
+        const historyLength = this.history.length;
+        if (this.undoDeep > 0) {
             this.undoDeep--;
-            this.dontWriteHistoryFlag=true;
-            this.changeState(this.history[historyLength-this.undoDeep-1]);
+            this.dontWriteHistoryFlag = true;
+            this.changeState(this.history[historyLength - this.undoDeep - 1]);
             return true;
         }
-        else{
+        else
             return false;
-        }
     }
 
     /**
      * Clears transition history
      */
-     clearHistory() {
-        this.history=[null,this.activeState];
+    clearHistory() {
+        this.history = [null, this.activeState];
     }
 
-    findedKey(inputkey,inputObj){
-        var keyAttr="notFounded";
+    findedKey(inputkey, inputObj) {
+        let keyAttr = "notFounded";
         //находим заданные ключи словаря и если они есть вносим в переменную, чтобы дальше с ним работать.
-        for (var key in inputObj) {
-            if (key===inputkey){
-                keyAttr=key;
-            };
-        };
+        for (let key in inputObj)
+            if (key === inputkey)
+                keyAttr = key;
         return keyAttr;
     }
 
-    disableRedoUndoAfterChangedState(){
-        var historyNew=[];
-        var historyLength=this.history.length;
-        for (var i = 0; i <= historyLength-this.undoDeep-1; i++) {
+    disableRedoUndoAfterChangedState() {
+        let historyNew = [];
+        let historyLength = this.history.length;
+        for (let i = 0; i <= historyLength - this.undoDeep - 1; i++)
             historyNew.push(this.history[i]);
-        };
-        this.undoDeep=0;
-        this.history=historyNew;
+        this.undoDeep = 0;
+        this.history = historyNew;
     };
 }
 
